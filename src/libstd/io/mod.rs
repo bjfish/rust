@@ -24,7 +24,6 @@ use error::Error as StdError;
 use fmt;
 use iter::Iterator;
 use marker::Sized;
-use mem;
 use ops::{Drop, FnOnce};
 use option::Option::{self, Some, None};
 use ptr::PtrExt;
@@ -69,8 +68,8 @@ fn with_end_to_cap<F>(v: &mut Vec<u8>, f: F) -> Result<usize>
     unsafe {
         let n = try!(f({
             let base = v.as_mut_ptr().offset(v.len() as isize);
-            black_box(slice::from_raw_mut_buf(mem::copy_lifetime(v, &base),
-                                              v.capacity() - v.len()))
+            black_box(slice::from_raw_parts_mut(base,
+                                                v.capacity() - v.len()))
         }));
 
         // If the closure (typically a `read` implementation) reported that it
@@ -97,7 +96,7 @@ fn with_end_to_cap<F>(v: &mut Vec<u8>, f: F) -> Result<usize>
 //
 // To this end, we use an RAII guard (to protect against panics) which updates
 // the length of the string when it is dropped. This guard initially truncates
-// the string to the prior length and only afer we've validated that the
+// the string to the prior length and only after we've validated that the
 // new contents are valid UTF-8 do we allow it to set a longer length.
 //
 // The unsafety in this function is twofold:
@@ -664,7 +663,7 @@ impl<T> Take<T> {
     ///
     /// # Note
     ///
-    /// This instance may reach EOF after reading fewer bytes than indiccated by
+    /// This instance may reach EOF after reading fewer bytes than indicated by
     /// this method if the underlying `Read` instance reaches EOF.
     pub fn limit(&self) -> u64 { self.limit }
 }

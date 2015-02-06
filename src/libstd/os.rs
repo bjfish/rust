@@ -671,7 +671,7 @@ fn real_args() -> Vec<String> {
 
         // Push it onto the list.
         let ptr = ptr as *const u16;
-        let buf = slice::from_raw_buf(&ptr, len);
+        let buf = slice::from_raw_parts(ptr, len);
         let opt_s = String::from_utf16(sys::truncate_utf16_at_nul(buf));
         opt_s.ok().expect("CommandLineToArgvW returned invalid UTF-16")
     }).collect();
@@ -759,7 +759,6 @@ pub fn page_size() -> uint {
 ///
 /// The memory map is released (unmapped) when the destructor is run, so don't
 /// let it leave scope by accident if you want it to stick around.
-#[allow(missing_copy_implementations)]
 pub struct MemoryMap {
     data: *mut u8,
     len: uint,
@@ -1289,6 +1288,8 @@ pub mod consts {
 }
 
 #[cfg(target_os = "openbsd")]
+#[deprecated(since = "1.0.0", reason = "renamed to env::consts")]
+#[unstable(feature = "os")]
 pub mod consts {
     pub use os::arch_consts::ARCH;
 
